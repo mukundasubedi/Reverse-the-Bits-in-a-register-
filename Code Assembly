@@ -1,0 +1,81 @@
+.data
+    int: .word 0
+    pleaseEnter: .asciiz "Enter an intented integer that you want to reverse: "
+    yourIntBin: .asciiz "Your reverse integer in binary code:        "
+    yourIntBinRev: .asciiz "reverse:         "
+    nl: .asciiz "\n"
+
+.text
+    main:
+    # ask the user for an integer
+    li $v0, 4
+    la $a0, pleaseEnter
+    syscall
+    li $v0, 5
+    syscall
+    sw $v0, int
+    li $t7, 31 # shamt is in t7
+
+    j loop1
+    loop1:
+        lw $t0, int # load int to t0
+        srlv $t1, $t0, $t7 # shift by counter
+        bnez $t1, exit1 # if the bit is 1, exit the loop
+        beqz $t7, exit1 
+        addi $t7, $t7, -1
+        j loop1
+
+    exit1: 
+    move $t4, $t7 
+    li $v0, 4
+    la $a0, nl
+    syscall
+    li $v0, 4
+    la $a0, yourIntBin
+    syscall
+    li $v0, 1
+    li $t6, 32 
+    sub $t7, $t6, $t7 
+
+    j loop2
+    loop2:
+        move $a0, $t1
+        syscall
+        beq $t7, $t6, exit2
+        lw $t0, int
+        sllv $t0, $t0, $t7
+        srl $t1, $t0, 31
+        addi $t7, $t7, 1
+        j loop2
+
+    exit2:
+    li $v0, 4
+    la $a0, nl
+    syscall
+    la $a0, yourIntBinRev
+    syscall
+
+    addi $t6, $t6, -1
+    move $t7, $t4
+    li $t4, 0
+    li $v0, 1
+    li $t5, 0
+    lw $t0, int
+
+    loop3:
+        sub $t4, $t6, $t5
+        sllv $t1, $t0, $t4
+        srl $a0, $t1, 31
+        syscall
+        beq $t5, $t7, exit3
+        addi $t4, $t4, 1
+        addi $t5, $t5, 1
+        j loop3
+
+    exit3:
+    li $v0, 4
+    la $a0, nl
+    syscall
+
+li $v0, 10   #terminate program
+syscall
